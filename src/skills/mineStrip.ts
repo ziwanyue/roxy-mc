@@ -37,7 +37,7 @@ const mineStripSkill: Skill = {
       const targetZ = startZ + dir.z * i;
 
       // 挖面前的方块
-      const block = bot.blockAt({ x: targetX, y: startY, z: targetZ } as any);
+      const block = bot.blockAt(pos.offset(targetX - pos.x, startY - pos.y, targetZ - pos.z));
       if (block && block.name !== 'air') {
         try {
           // 先走到方块旁边

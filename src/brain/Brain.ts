@@ -177,30 +177,70 @@ export class Brain {
         return;
       }
 
-      // 1.5 血量偏低时用治愈魔法
+      // ═══ 洛琪希自动魔法系统 ═══
+      // 根据战况智能选择最合适的魔法
+
+      // 1. 低血量 → 治愈
       if (this.bot.health < 12 && this.bot.health >= 6) {
-        logger.bot('💚 血量偏低，使用治愈魔法');
-        await executeSkill('magic', { bot: this.bot, args: { spell: 'heal_water', target: this.bot.username } });
+        const healSpell = this.bot.health < 8 ? 'regeneration' : 'heal';
+        logger.bot(`💚 血量 ${this.bot.health}/20，使用治愈魔法`);
+        await executeSkill('magic', { bot: this.bot, args: { spell: healSpell, target: this.bot.username } });
+        return;
       }
 
-      // 1.6 检测附近敌对生物 → 用魔法攻击！
-      const hostileTarget = Object.values(this.bot.entities).find((e: any) =>
+      // 2. 检测附近敌对生物 → 选择最合适的攻击魔法
+      const hostileMobs = Object.values(this.bot.entities).filter((e: any) =>
         e && e !== this.bot.entity && e.type === 'mob' && e.position &&
-        e.position.distanceTo(this.bot.entity.position) < 12 &&
-        ['zombie', 'skeleton', 'creeper', 'spider', 'drowned', 'phantom', 'enderman',
-         'blaze', 'hoglin', 'piglin', 'witch', 'pillager', 'slime'].includes(e.name)
+        e.position.distanceTo(this.bot.entity.position) < 14 &&
+        ['zombie','skeleton','creeper','spider','drowned','phantom','enderman','blaze',
+         'hoglin','piglin','witch','pillager','slime','magma_cube','guardian','cave_spider',
+         'stray','husk','wither_skeleton','piglin_brute','zoglin','ravager','vindicator','evoker'].includes(e.name)
       );
-      if (hostileTarget && Math.random() < 0.4) {
-        // 选择魔法：远程用冰枪/雷击，近战用水炮
-        const dist = hostileTarget.position.distanceTo(this.bot.entity.position);
-        const spell = dist > 5 ? 'thunder_bolt' :
-                      dist > 3 ? 'ice_lance' : 'water_cannon';
-        logger.bot(`⚡ 发现 ${hostileTarget.name}，使用 ${spell}！`);
-        await executeSkill('magic', { bot: this.bot, args: { spell, target: hostileTarget.name } });
-        // 魔法没打死再补一剑
-        if (dist < 4) {
+
+      if (hostileMobs.length > 0) {
+        const closest = hostileMobs.sort((a: any, b: any) =>
+          a.position.distanceTo(this.bot.entity.position) - b.position.distanceTo(this.bot.entity.position)
+        )[0];
+        const dist = closest.position.distanceTo(this.bot.entity.position);
+        const count = hostileMobs.length;
+
+        let spell = 'water_ball';
+        let strategy = '';
+
+        if (count >= 3) {
+          const aoe = ['blizzard','thunder_raincloud','great_tsunami','wrath_water_king'];
+          spell = aoe[Math.floor(Math.random() * aoe.length)];
+          strategy = `群怪(${count}只)`;
+        } else if (dist > 8) {
+          const ranged = ['thunder_bolt','water_dragon','fireball','ice_lance'];
+          spell = ranged[Math.floor(Math.random() * ranged.length)];
+          strategy = '远程';
+        } else if (dist > 4) {
+          const mid = ['ice_lance','wind_cutter','rock_bullet','water_blade'];
+          spell = mid[Math.floor(Math.random() * mid.length)];
+          strategy = '中距离';
+        } else {
+          const close = ['water_ball','ice_shards','gust','water_prison'];
+          spell = close[Math.floor(Math.random() * close.length)];
+          strategy = '近战';
+        }
+        if (['ravager','evoker','piglin_brute'].includes(closest.name || '') && Math.random() < 0.5) {
+          spell = 'wrath_water_king'; strategy = `Boss(${closest.name})`;
+        }
+        if ((closest.name || '') === 'creeper' && dist < 4) { spell = 'gust'; strategy = '苦力怕'; }
+
+        logger.bot(`⚡[${strategy}] ${closest.name}(${Math.round(dist)}m)→${spell}`);
+        await executeSkill('magic', { bot: this.bot, args: { spell } });
+
+        if (closest.position?.distanceTo(this.bot.entity.position) < 4) {
           await executeSkill('attack', { bot: this.bot, args: {} });
         }
+        return;
+      }
+
+      // 3. 野外探索时偶尔用辅助魔法
+      if (Math.random() < 0.04) {
+        await executeSkill('magic', { bot: this.bot, args: { spell: 'mana_detect' } });
         return;
       }
 
