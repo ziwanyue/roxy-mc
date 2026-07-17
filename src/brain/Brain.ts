@@ -23,6 +23,8 @@ import '../skills/farm.js';
 import '../skills/sleep.js';
 import '../skills/explore.js';
 import '../skills/flee.js';
+import '../skills/cook.js';
+import '../skills/give.js';
 
 interface Task {
   action: string;
@@ -202,6 +204,30 @@ export class Brain {
           this.taskQueue = [{ action: 'sleep', params: {} }];
           logger.bot('🌙 天黑了，去找床睡觉...');
           return;
+        }
+      }
+
+      // 4. 检测附近玩家饱食度 → 自动投喂
+      if (Math.random() < 0.1) { // 每 10 次检查一次
+        for (const [name, player] of Object.entries(this.bot.players) as any) {
+          if (name === this.bot.username || /^Roxy\d{4,}$/.test(name)) continue;
+          if (!player.entity) continue;
+          const dist = player.entity.position.distanceTo(this.bot.entity.position);
+          if (dist > 8) continue;
+
+          // 有食物就给玩家
+          const food = this.bot.inventory.items().find((i: any) =>
+            ['cooked_beef', 'cooked_porkchop', 'cooked_chicken', 'bread',
+             'baked_potato', 'apple', 'golden_apple', 'cooked_mutton'].includes(i.name)
+          );
+          if (food) {
+            try {
+              await this.bot.toss(food.type, null, 1);
+              this.bot.chat(`${name}，给你点吃的！`);
+              logger.bot(`🎁 自动投喂 ${name} ${food.name}`);
+            } catch { /* 跳过 */ }
+          }
+          break;
         }
       }
 

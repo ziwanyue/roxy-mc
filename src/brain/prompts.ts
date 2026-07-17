@@ -80,6 +80,12 @@ mineStrip — 挖矿道
 farm — 种地收菜
 { "action": "farm", "params": { "mode": "auto|plant|harvest" } }
 
+cook — 用熔炉煮饭
+{ "action": "cook", "params": {} }
+
+give — 给玩家食物/物品
+{ "action": "give", "params": { "item": "food", "player": "玩家名" } }
+
 wait — 等一下
 { "action": "wait", "params": { "seconds": 秒数 } }
 
