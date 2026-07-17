@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment
+.env
+
+# Minecraft server files
+server/libraries/
+server/logs/
+server/world/
+server/world_nether/
+server/world_the_end/
+server/versions/
+server/*.json
+server/*.txt
+server/logs_old/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Bot runtime
+.bot.lock
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
