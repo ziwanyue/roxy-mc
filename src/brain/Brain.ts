@@ -177,6 +177,33 @@ export class Brain {
         return;
       }
 
+      // 1.5 血量偏低时用治愈魔法
+      if (this.bot.health < 12 && this.bot.health >= 6) {
+        logger.bot('💚 血量偏低，使用治愈魔法');
+        await executeSkill('magic', { bot: this.bot, args: { spell: 'heal_water', target: this.bot.username } });
+      }
+
+      // 1.6 检测附近敌对生物 → 用魔法攻击！
+      const hostileTarget = Object.values(this.bot.entities).find((e: any) =>
+        e && e !== this.bot.entity && e.type === 'mob' && e.position &&
+        e.position.distanceTo(this.bot.entity.position) < 12 &&
+        ['zombie', 'skeleton', 'creeper', 'spider', 'drowned', 'phantom', 'enderman',
+         'blaze', 'hoglin', 'piglin', 'witch', 'pillager', 'slime'].includes(e.name)
+      );
+      if (hostileTarget && Math.random() < 0.4) {
+        // 选择魔法：远程用冰枪/雷击，近战用水炮
+        const dist = hostileTarget.position.distanceTo(this.bot.entity.position);
+        const spell = dist > 5 ? 'thunder_bolt' :
+                      dist > 3 ? 'ice_lance' : 'water_cannon';
+        logger.bot(`⚡ 发现 ${hostileTarget.name}，使用 ${spell}！`);
+        await executeSkill('magic', { bot: this.bot, args: { spell, target: hostileTarget.name } });
+        // 魔法没打死再补一剑
+        if (dist < 4) {
+          await executeSkill('attack', { bot: this.bot, args: {} });
+        }
+        return;
+      }
+
       // 2. 饥饿时自动进食
       if (this.bot.food < 10) {
         const food = this.bot.inventory.items().find((i: any) =>
