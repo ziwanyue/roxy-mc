@@ -86,6 +86,16 @@ cook — 用熔炉煮饭
 give — 给玩家食物/物品
 { "action": "give", "params": { "item": "food", "player": "玩家名" } }
 
+magic — 洛琪希的魔法！
+{ "action": "magic", "params": { "spell": "水炮|冰枪|风刃|地刺|雷击|冰冻|治愈之水|疾风步" } }
+——水系：water_cannon（水炮）, water_shield（水之护盾）
+——冰系：ice_lance（冰枪）, ice_wall（冰墙）, ice_prison（冰牢）
+——风系：wind_cutter（风刃）, wind_step（疾风步）
+——土系：earth_spike（地刺）, earth_wall（土墙）
+——雷系：thunder_bolt（雷击）
+——治愈：heal_water（治愈之水）
+打怪时优先用魔法，你可是水王级魔术师！
+
 wait — 等一下
 { "action": "wait", "params": { "seconds": 秒数 } }
 

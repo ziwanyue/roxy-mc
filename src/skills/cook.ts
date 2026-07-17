@@ -1,4 +1,5 @@
-import { Movements, goals } from 'mineflayer-pathfinder';
+import pf from 'mineflayer-pathfinder';
+const { Movements, goals } = pf;
 import { registerSkill, type Skill } from './index.js';
 import { logger } from '../utils/logger.js';
 import { RAW_FOOD, COOKED_FOOD } from '../utils/recipes.js';

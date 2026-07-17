@@ -25,6 +25,7 @@ import '../skills/explore.js';
 import '../skills/flee.js';
 import '../skills/cook.js';
 import '../skills/give.js';
+import '../skills/magic.js';
 
 interface Task {
   action: string;
