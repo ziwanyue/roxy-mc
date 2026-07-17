@@ -101,6 +101,39 @@ export async function equipBestWeapon(bot: Bot): Promise<void> {
   }
 }
 
+/**
+ * 自动装备最好的盔甲
+ */
+export async function equipBestArmor(bot: Bot): Promise<void> {
+  const armorSlots = ['head', 'torso', 'legs', 'feet'] as const;
+  const armorTypes = ['helmet', 'chestplate', 'leggings', 'boots'] as const;
+  const tiers = ['leather', 'golden', 'chainmail', 'iron', 'diamond', 'netherite'];
+
+  for (let i = 0; i < armorSlots.length; i++) {
+    const slot = armorSlots[i];
+    const type = armorTypes[i];
+
+    // 找最好的该部位盔甲
+    let bestItem: any = null;
+    let bestTier = -1;
+
+    for (const item of bot.inventory.items()) {
+      if (!item.name.includes(type)) continue;
+      const tierIdx = tiers.findIndex(t => item.name.includes(t));
+      if (tierIdx > bestTier) {
+        bestTier = tierIdx;
+        bestItem = item;
+      }
+    }
+
+    if (bestItem) {
+      try {
+        await bot.equip(bestItem, slot);
+      } catch { /* 忽略 */ }
+    }
+  }
+}
+
 function isGoodToolFor(toolName: string, blockName: string): boolean {
   let toolType = '';
   if (toolName.includes('pickaxe')) toolType = 'pickaxe';
